@@ -1,86 +1,76 @@
-metrics:
-  cpu:
-    unit: instance
-    alt_name: instance
-    groupby:
-      - id
-      - project_id
-    metadata:
-      - flavor
-      - flavor_id
-      - vcpus
-    mutate: NUMBOOL
-    extra_args:
-      aggregation_method: max
-      resource_type: instance
+- name: OpenStack
 
-  image.size:
-    unit: MiB
-    factor: 1/1048576
-    groupby:
-      - id
-      - project_id
-    metadata:
-      - container_format
-      - disk_format
-    extra_args:
-      aggregation_method: max
-      resource_type: image
+  collector: gnocchi
+  period: 3600
+  wait_periods: 2
+  window: 1800
 
-  volume.size:
-    unit: GiB
-    groupby:
-      - id
-      - project_id
-    metadata:
-      - volume_type
-    extra_args:
-      aggregation_method: max
-      resource_type: volume
+  services:
+    - compute
+    - volume
+    - network.bw.in
+    - network.bw.out
+    - network.floating
+    - image
 
-  network.outgoing.bytes:
-    unit: MB
-    groupby:
-      - id
-      - project_id
-    factor: 1/1000000
-    metadata:
-      - instance_id
-    extra_args:
-      aggregation_method: max
-      resource_type: instance_network_interface
+  services_objects:
+    compute: instance
+    volume: volume
+    network.bw.out: instance_network_interface
+    network.bw.in: instance_network_interface
+    network.floating: network
+    image: image
+    radosgw.usage: ceph_account
 
-  network.incoming.bytes:
-    unit: MB
-    groupby:
-      - id
-      - project_id
-    factor: 1/1000000
-    metadata:
-      - instance_id
-    extra_args:
-      aggregation_method: max
-      resource_type: instance_network_interface
+  services_metrics:
+    compute:
+      - vcpus: max
+      - memory: max
+      - cpu: max
+      - disk.root.size: max
+      - disk.ephemeral.size: max
+    volume:
+      - volume.size: max
+    network.bw.in:
+      - network.incoming.bytes: max
+    network.bw.out:
+      - network.outgoing.bytes: max
+    network.floating:
+      - ip.floating: max
+    image:
+      - image.size: max
+      - image.download: max
+      - image.serve: max
+    radosgw.usage:
+      - radosgw.objects.size: max
 
-  ip.floating:
-    unit: ip
-    groupby:
-      - id
-      - project_id
-    metadata:
-      - state
-    mutate: NUMBOOL
-    extra_args:
-      aggregation_method: max
-      resource_type: network
-
-  radosgw.objects.size:
-    unit: GiB
-    groupby:
-      - id
-      - project_id
-    factor: 1/1073741824
-    extra_args:
-      aggregation_method: max
-      resource_type: ceph_account
+  metrics_units:
+    compute:
+      1:
+        unit: instance
+    volume:
+      volume.size:
+        unit: GiB
+    network.bw.in:
+      network.incoming.bytes:
+        unit: MB
+        factor: 1/1000000
+    network.bw.out:
+      network.outgoing.bytes:
+        unit: MB
+        factor: 1/1000000
+    network.floating:
+      1:
+        unit: ip
+    image:
+      image.size:
+        unit: MiB
+        factor: 1/1048576
+    radosgw.usage:
+      radosgw.objects.size:
+        unit: GiB
+        factor: 1/1073741824
+    default_unit:
+      1:
+        unit: unknown
 
