@@ -1,7 +1,4 @@
 FROM ubuntu:18.04
-
-ENV VERSION 7.0.0
-
 RUN apt-get update && apt-get install -y \
 	python \
 	git \
@@ -14,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir cloudkitty \
 	&& cd cloudkitty \
 	&& git clone https://git.openstack.org/openstack/cloudkitty.git . \
-	&& git checkout $VERSION \
+	&& git checkout 8.0.0 \
 	&& python setup.py install \
 	&& mkdir /etc/cloudkitty \
 	&& tox -e genconfig \
